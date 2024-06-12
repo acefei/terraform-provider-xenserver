@@ -44,3 +44,10 @@ data "xenserver_sr" "sr" {
 output "local_storage_output" {
   value = data.xenserver_sr.sr.data_items
 }
+resource "xenserver_network" "network" {
+  name_label = "Network of VM"
+}
+
+output "network_out" {
+  value = xenserver_network.network.id
+}
