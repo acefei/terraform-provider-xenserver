@@ -16,13 +16,13 @@ provider "xenserver" {
   password = local.env_vars["XENSERVER_PASSWORD"]
 }
 
-data "xenserver_pif" "pif_data" {
+data "xenserver_pif" "pif" {
   device     = "eth0"
   management = true
 }
 
 output "pif_data_out" {
-  value = data.xenserver_pif.pif_data
+  value = data.xenserver_pif.pif.data_items
 }
 
 resource "xenserver_vm" "vm" {
@@ -44,6 +44,7 @@ data "xenserver_sr" "sr" {
 output "local_storage_output" {
   value = data.xenserver_sr.sr.data_items
 }
+
 resource "xenserver_network" "network" {
   name_label = "Network of VM"
 }
