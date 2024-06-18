@@ -3,7 +3,7 @@ default: testacc
 
 # Run acceptance tests
 .PHONY: testacc
-testacc:  ## make testacc
+testacc: provider ## make testacc
 	source .env && TF_ACC=1 go test ./xenserver/ -v  $(TESTARGS) -timeout 120m
 
 doc:  ## make doc for terraform provider documentation
@@ -15,7 +15,7 @@ provider: go.mod  ## make provider
 	go install .
 	ls -l $(GOBIN)/terraform-provider-xenserver
 
-apply: .env  ## make apply
+apply: .env provider ## make apply
 	cd examples/terraform-main && \
     terraform plan && \
     terraform apply -auto-approve

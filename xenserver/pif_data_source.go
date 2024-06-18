@@ -272,8 +272,6 @@ func (d *pifDataSource) Read(ctx context.Context, req datasource.ReadRequest, re
 		pifItems = append(pifItems, pifData)
 	}
 
-	data.DataItems = pifItems
-
 	// Save data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
