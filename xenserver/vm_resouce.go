@@ -1,5 +1,3 @@
-// Example of resource
-
 package xenserver
 
 import (
@@ -19,7 +17,6 @@ import (
 	"xenapi"
 )
 
-// Ensure provider defined types fully satisfy framework interfaces.
 var (
 	_ resource.Resource                = &vmResource{}
 	_ resource.ResourceWithConfigure   = &vmResource{}
@@ -30,23 +27,18 @@ func NewVMResource() resource.Resource {
 	return &vmResource{}
 }
 
-// vmResource defines the resource implementation.
 type vmResource struct {
 	session *xenapi.Session
 }
 
-// Set the resource name
 func (r *vmResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_vm"
 }
 
-// Set the defined data model of the resource
 func (r *vmResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "VM resource",
 		Attributes: map[string]schema.Attribute{
-			// required
 			"name_label": schema.StringAttribute{
 				MarkdownDescription: "The name of the virtual machine",
 				Required:            true,
@@ -54,12 +46,7 @@ func (r *vmResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *r
 			"template_name": schema.StringAttribute{
 				MarkdownDescription: "The template name of the virtual machine which cloned from",
 				Required:            true,
-				// The resource will be removed and created again if the value of the attribute changes
-				// PlanModifiers: []planmodifier.String{
-				// 	stringplanmodifier.RequiresReplace(),
-				// },
 			},
-			// optional
 			"other_config": schema.MapAttribute{
 				MarkdownDescription: "The other config of the virtual machine",
 				Optional:            true,
@@ -67,12 +54,12 @@ func (r *vmResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *r
 				ElementType:         types.StringType,
 				Default:             mapdefault.StaticValue(types.MapValueMust(types.StringType, map[string]attr.Value{})),
 			},
-			// read only
-			"snapshots": schema.ListAttribute{
-				MarkdownDescription: "The all snapshots of the virtual machine",
-				// If Required and Optional are both false, Computed must be true, and the attribute will be considered "read only"
-				Computed:    true,
-				ElementType: types.StringType,
+			"hard_drive": schema.ListNestedAttribute{
+				MarkdownDescription: "List of hard drive for VM (disk)",
+				Required:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: VBDSchema(),
+				},
 			},
 			"id": schema.StringAttribute{
 				MarkdownDescription: "UUID of the virtual machine",
@@ -86,9 +73,7 @@ func (r *vmResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *r
 	}
 }
 
-// Set the parameter of the resource, pass value from provider
 func (r *vmResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
 	}
@@ -103,8 +88,6 @@ func (r *vmResource) Configure(_ context.Context, req resource.ConfigureRequest,
 	r.session = session
 }
 
-// Read data from Plan, create resource, get data from new source, set to State
-// terraform plan/apply
 func (r *vmResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data vmResourceModel
 	// Read Terraform plan data into the model
@@ -142,6 +125,7 @@ func (r *vmResource) Create(ctx context.Context, req resource.CreateRequest, res
 		)
 		return
 	}
+
 	err = xenapi.VM.SetOtherConfig(r.session, vmRef, otherConfig)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -160,6 +144,7 @@ func (r *vmResource) Create(ctx context.Context, req resource.CreateRequest, res
 		)
 		return
 	}
+
 	// Set all computed values
 	data.UUID = types.StringValue(vmRecord.UUID)
 	err = updateVMResourceModelComputed(ctx, vmRecord, &data)
