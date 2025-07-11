@@ -153,7 +153,7 @@ func (r *vdiResource) Create(ctx context.Context, req resource.CreateRequest, re
 		return
 	}
 
-	err = updateVDIResourceModelComputed(ctx, r.session, vdiRecord, &data)
+	err = updateVDIResourceModelComputed(ctx, vdiRecord, &data)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update the computed fields of VDIResourceModel",
@@ -255,7 +255,7 @@ func (r *vdiResource) Update(ctx context.Context, req resource.UpdateRequest, re
 		)
 		return
 	}
-	err = updateVDIResourceModelComputed(ctx, r.session, vdiRecord, &plan)
+	err = updateVDIResourceModelComputed(ctx, vdiRecord, &plan)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Unable to update the computed fields of VDIResourceModel",

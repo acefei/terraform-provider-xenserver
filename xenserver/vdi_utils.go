@@ -168,10 +168,10 @@ func updateVDIResourceModel(ctx context.Context, session *xenapi.Session, record
 		return err
 	}
 	data.SR = types.StringValue(srUUID)
-	return updateVDIResourceModelComputed(ctx, session, record, data)
+	return updateVDIResourceModelComputed(ctx, record, data)
 }
 
-func updateVDIResourceModelComputed(ctx context.Context, session *xenapi.Session, record xenapi.VDIRecord, data *vdiResourceModel) error {
+func updateVDIResourceModelComputed(ctx context.Context, record xenapi.VDIRecord, data *vdiResourceModel) error {
 	data.UUID = types.StringValue(record.UUID)
 	data.ID = types.StringValue(record.UUID)
 	data.NameDescription = types.StringValue(record.NameDescription)
